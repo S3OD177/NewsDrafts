@@ -63,3 +63,6 @@ This app intentionally has no in-app auth and assumes edge protection via Cloudf
 - `/sources`
 - `/settings`
 - `/` redirects to `/inbox`
+
+## Build troubleshooting
+If `next build` fails with `Cannot find module 'autoprefixer'`, ensure dependencies are installed from `package.json` and that your environment is not skipping required packages during install. This repository includes `autoprefixer` explicitly for PostCSS builds.
