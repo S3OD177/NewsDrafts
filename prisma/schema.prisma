@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DraftType {
+  SHORT
+  WHY
+  THREAD
+  CUSTOM
+}
+
+enum DraftStatus {
+  DRAFT
+  APPROVED
+  POSTED
+  REJECTED
+}
+
+model Source {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  rssUrl        String   @unique
+  topic         String
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+  lastFetchedAt DateTime? @db.Timestamptz(6)
+  lastError     String?
+  errorCount    Int      @default(0)
+
+  items         Item[]
+}
+
+model Item {
+  id          String   @id @default(uuid()) @db.Uuid
+  sourceId    String   @db.Uuid
+  title       String
+  url         String
+  publishedAt DateTime? @db.Timestamptz(6)
+  snippet     String?
+  contentText String?
+  hash        String   @unique
+  score       Int      @default(0)
+  topic       String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+
+  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  drafts      Draft[]
+
+  @@index([publishedAt])
+  @@index([score])
+  @@index([topic])
+}
+
+model Draft {
+  id        String      @id @default(uuid()) @db.Uuid
+  itemId    String?     @db.Uuid
+  type      DraftType
+  content   String
+  status    DraftStatus @default(DRAFT)
+  tweetUrl  String?
+  createdAt DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime    @updatedAt @db.Timestamptz(6)
+
+  item      Item?       @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model Settings {
+  id              Int      @id
+  includeKeywords String[]
+  excludeKeywords String[]
+  dedupDays       Int      @default(30)
+  scoreRules      Json
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+}
