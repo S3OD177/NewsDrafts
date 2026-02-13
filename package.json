@@ -37,5 +37,6 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "autoprefixer": "^10.4.20"
+    "typescript": "^5.7.2"
   }
 }
